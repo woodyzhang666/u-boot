@@ -4,6 +4,7 @@
  * Written by Simon Glass <sjg@chromium.org>
  */
 
+#define DEBUG
 #include <common.h>
 #include <env.h>
 #include <env_internal.h>

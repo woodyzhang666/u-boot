@@ -7,6 +7,7 @@
  *
  * Based loosely off of Linux's PHY Lib
  */
+#define DEBUG
 #include <common.h>
 #include <console.h>
 #include <dm.h>

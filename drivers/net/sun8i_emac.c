@@ -10,6 +10,7 @@
  *
 */
 
+#define DEBUG
 #include <cpu_func.h>
 #include <log.h>
 #include <asm/cache.h>
@@ -63,6 +64,7 @@
 #define RX_TOTAL_BUFSIZE	(CONFIG_ETH_BUFSIZE * CONFIG_RX_DESCR_NUM)
 
 #define H3_EPHY_DEFAULT_VALUE	0x58000
+#define V3S_EPHY_DEFAULT_VALUE  0x38000
 #define H3_EPHY_DEFAULT_MASK	GENMASK(31, 15)
 #define H3_EPHY_ADDR_SHIFT	20
 #define REG_PHY_ADDR_MASK	GENMASK(4, 0)
@@ -145,6 +147,7 @@ enum emac_variant {
 	A64_EMAC,
 	R40_GMAC,
 	H6_EMAC,
+	V3S_EMAC,
 };
 
 struct emac_dma_desc {
@@ -307,7 +310,10 @@ static u32 sun8i_emac_set_syscon_ephy(struct emac_eth_dev *priv, u32 reg)
 		 * needs to be configured and powered up before use
 		*/
 		reg &= ~H3_EPHY_DEFAULT_MASK;
-		reg |=  H3_EPHY_DEFAULT_VALUE;
+		if (priv->variant == H3_EMAC)
+			reg |=  H3_EPHY_DEFAULT_VALUE;
+		if (priv->variant == V3S_EMAC)
+			reg |= V3S_EPHY_DEFAULT_VALUE;
 		reg |= priv->phyaddr << H3_EPHY_ADDR_SHIFT;
 		reg &= ~H3_EPHY_SHUTDOWN;
 		return reg | H3_EPHY_SELECT;
@@ -342,6 +348,7 @@ static int sun8i_emac_set_syscon(struct sun8i_eth_pdata *pdata,
 
 	reg &= ~(SC_ETCS_MASK | SC_EPIT);
 	if (priv->variant == H3_EMAC ||
+		priv->variant == V3S_EMAC ||
 	    priv->variant == A64_EMAC ||
 	    priv->variant == H6_EMAC)
 		reg &= ~SC_RMII_EN;
@@ -952,7 +959,7 @@ static int sun8i_emac_eth_of_to_plat(struct udevice *dev)
 		return -EINVAL;
 	}
 
-	if (priv->variant == H3_EMAC) {
+	if (priv->variant == H3_EMAC || priv->variant == V3S_EMAC) {
 		ret = sun8i_handle_internal_phy(dev, priv);
 		if (ret)
 			return ret;
@@ -997,6 +1004,7 @@ static int sun8i_emac_eth_of_to_plat(struct udevice *dev)
 
 static const struct udevice_id sun8i_emac_eth_ids[] = {
 	{.compatible = "allwinner,sun8i-h3-emac", .data = (uintptr_t)H3_EMAC },
+	{.compatible = "allwinner,sun8i-v3s-emac", .data = (uintptr_t)V3S_EMAC },
 	{.compatible = "allwinner,sun50i-a64-emac",
 		.data = (uintptr_t)A64_EMAC },
 	{.compatible = "allwinner,sun8i-a83t-emac",

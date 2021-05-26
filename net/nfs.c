@@ -26,6 +26,7 @@
  * NFSv2 is still used by default. But if server does not support NFSv2, then
  * NFSv3 is used, if available on NFS server. */
 
+#define DEBUG
 #include <common.h>
 #include <command.h>
 #include <flash.h>

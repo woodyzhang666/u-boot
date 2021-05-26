@@ -6,6 +6,7 @@
  * Copyright (c) 2018, Theobroma Systems Design und Consulting GmbH
  */
 
+#define DEBUG
 #include <common.h>
 #include <clk.h>
 #include <clk-uclass.h>

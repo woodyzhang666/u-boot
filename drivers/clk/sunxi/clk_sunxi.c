@@ -4,6 +4,7 @@
  * Author: Jagan Teki <jagan@amarulasolutions.com>
  */
 
+#define DEBUG
 #include <common.h>
 #include <clk-uclass.h>
 #include <dm.h>

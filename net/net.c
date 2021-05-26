@@ -81,6 +81,7 @@
  */
 
 
+#define DEBUG
 #include <common.h>
 #include <bootstage.h>
 #include <command.h>
