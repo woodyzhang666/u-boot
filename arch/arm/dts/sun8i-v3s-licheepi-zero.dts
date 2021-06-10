@@ -84,14 +84,11 @@
 	status = "okay";
 };
 
-&mmc1 {
-	broken-cd;
-	bus-width = <4>;
-	vmmc-supply = <&reg_vcc3v3>;
+&emac {
 	status = "okay";
 };
 
-&emac {
+&spi0 {
 	status = "okay";
 };
 

@@ -3,7 +3,6 @@
  * Copyright 2020 NXP
  */
 
-#define DEBUG
 #include <common.h>
 #include <dm.h>
 #include <net.h>

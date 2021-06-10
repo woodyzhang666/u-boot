@@ -5,7 +5,6 @@
  * Joe Hershberger, National Instruments
  */
 
-#define DEBUG
 #include <common.h>
 #include <bootstage.h>
 #include <dm.h>

@@ -10,7 +10,6 @@
  *
 */
 
-#define DEBUG
 #include <cpu_func.h>
 #include <log.h>
 #include <asm/cache.h>
@@ -64,7 +63,6 @@
 #define RX_TOTAL_BUFSIZE	(CONFIG_ETH_BUFSIZE * CONFIG_RX_DESCR_NUM)
 
 #define H3_EPHY_DEFAULT_VALUE	0x58000
-#define V3S_EPHY_DEFAULT_VALUE  0x38000
 #define H3_EPHY_DEFAULT_MASK	GENMASK(31, 15)
 #define H3_EPHY_ADDR_SHIFT	20
 #define REG_PHY_ADDR_MASK	GENMASK(4, 0)
@@ -310,10 +308,8 @@ static u32 sun8i_emac_set_syscon_ephy(struct emac_eth_dev *priv, u32 reg)
 		 * needs to be configured and powered up before use
 		*/
 		reg &= ~H3_EPHY_DEFAULT_MASK;
-		if (priv->variant == H3_EMAC)
+		if (priv->variant == H3_EMAC || priv->variant == V3S_EMAC)
 			reg |=  H3_EPHY_DEFAULT_VALUE;
-		if (priv->variant == V3S_EMAC)
-			reg |= V3S_EPHY_DEFAULT_VALUE;
 		reg |= priv->phyaddr << H3_EPHY_ADDR_SHIFT;
 		reg &= ~H3_EPHY_SHUTDOWN;
 		return reg | H3_EPHY_SELECT;
