@@ -284,7 +284,7 @@ CONFIG_IMX_DCD_ADDR=0x00910000
 # CONFIG_DEBUG_LL is not set
 CONFIG_SPL_PAYLOAD="u-boot.bin"
 CONFIG_BUILD_TARGET=""
-CONFIG_DEFAULT_DEVICE_TREE="sun8i-v3s-licheepi-zero"
+CONFIG_DEFAULT_DEVICE_TREE="sun8i-v3s-licheepi-zero-spi-emac"
 # CONFIG_DEBUG_UART is not set
 # CONFIG_AHCI is not set
 # CONFIG_OF_BOARD_FIXUP is not set
