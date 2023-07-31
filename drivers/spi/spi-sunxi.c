@@ -129,6 +129,7 @@ struct sun4i_spi_variant {
 	u32 fifo_depth;
 	bool has_soft_reset;
 	bool has_burst_ctl;
+	bool has_ccr;
 };
 
 struct sun4i_spi_plat {
@@ -236,41 +237,43 @@ static void sun4i_spi_set_speed_mode(struct udevice *dev)
 	unsigned int div;
 	u32 reg;
 
-	/*
-	 * Setup clock divider.
-	 *
-	 * We have two choices there. Either we can use the clock
-	 * divide rate 1, which is calculated thanks to this formula:
-	 * SPI_CLK = MOD_CLK / (2 ^ (cdr + 1))
-	 * Or we can use CDR2, which is calculated with the formula:
-	 * SPI_CLK = MOD_CLK / (2 * (cdr + 1))
-	 * Whether we use the former or the latter is set through the
-	 * DRS bit.
-	 *
-	 * First try CDR2, and if we can't reach the expected
-	 * frequency, fall back to CDR1.
-	 */
+	if (priv->variant->has_ccr) {
+		/*
+		 * Setup clock divider.
+		 *
+		 * We have two choices there. Either we can use the clock
+		 * divide rate 1, which is calculated thanks to this formula:
+		 * SPI_CLK = MOD_CLK / (2 ^ (cdr + 1))
+		 * Or we can use CDR2, which is calculated with the formula:
+		 * SPI_CLK = MOD_CLK / (2 * (cdr + 1))
+		 * Whether we use the former or the latter is set through the
+		 * DRS bit.
+		 *
+		 * First try CDR2, and if we can't reach the expected
+		 * frequency, fall back to CDR1.
+		 */
 
-	div = DIV_ROUND_UP(SUNXI_INPUT_CLOCK, priv->freq);
-	reg = readl(SPI_REG(priv, SPI_CCR));
+		div = DIV_ROUND_UP(SUNXI_INPUT_CLOCK, priv->freq);
+		reg = readl(SPI_REG(priv, SPI_CCR));
 
-	if ((div / 2) <= (SUN4I_CLK_CTL_CDR2_MASK + 1)) {
-		div /= 2;
-		if (div > 0)
-			div--;
+		if ((div / 2) <= (SUN4I_CLK_CTL_CDR2_MASK + 1)) {
+			div /= 2;
+			if (div > 0)
+				div--;
 
-		reg &= ~(SUN4I_CLK_CTL_CDR2_MASK | SUN4I_CLK_CTL_DRS);
-		reg |= SUN4I_CLK_CTL_CDR2(div) | SUN4I_CLK_CTL_DRS;
-	} else {
-		div = fls(div - 1);
-		/* The F1C100s encodes the divider as 2^(n+1) */
-		if (IS_ENABLED(CONFIG_MACH_SUNIV))
-			div--;
-		reg &= ~((SUN4I_CLK_CTL_CDR1_MASK << 8) | SUN4I_CLK_CTL_DRS);
-		reg |= SUN4I_CLK_CTL_CDR1(div);
+			reg &= ~(SUN4I_CLK_CTL_CDR2_MASK | SUN4I_CLK_CTL_DRS);
+			reg |= SUN4I_CLK_CTL_CDR2(div) | SUN4I_CLK_CTL_DRS;
+		} else {
+			div = fls(div - 1);
+			/* The F1C100s encodes the divider as 2^(n+1) */
+			if (IS_ENABLED(CONFIG_MACH_SUNIV))
+				div--;
+			reg &= ~((SUN4I_CLK_CTL_CDR1_MASK << 8) | SUN4I_CLK_CTL_DRS);
+			reg |= SUN4I_CLK_CTL_CDR1(div);
+		}
+
+		writel(reg, SPI_REG(priv, SPI_CCR));
 	}
-
-	writel(reg, SPI_REG(priv, SPI_CCR));
 
 	reg = readl(SPI_REG(priv, SPI_TCR));
 	reg &= ~(SPI_BIT(priv, SPI_TCR_CPOL) | SPI_BIT(priv, SPI_TCR_CPHA));
@@ -527,6 +530,7 @@ static const struct sun4i_spi_variant sun4i_a10_spi_variant = {
 	.regs			= sun4i_spi_regs,
 	.bits			= sun4i_spi_bits,
 	.fifo_depth		= 64,
+	.has_ccr			= true,
 };
 
 static const struct sun4i_spi_variant sun6i_a31_spi_variant = {
@@ -535,6 +539,7 @@ static const struct sun4i_spi_variant sun6i_a31_spi_variant = {
 	.fifo_depth		= 128,
 	.has_soft_reset		= true,
 	.has_burst_ctl		= true,
+	.has_ccr			= true,
 };
 
 static const struct sun4i_spi_variant sun8i_h3_spi_variant = {
@@ -543,6 +548,16 @@ static const struct sun4i_spi_variant sun8i_h3_spi_variant = {
 	.fifo_depth		= 64,
 	.has_soft_reset		= true,
 	.has_burst_ctl		= true,
+	.has_ccr			= true,
+};
+
+static const struct sun4i_spi_variant sun20i_d1_spi_variant = {
+	.regs			= sun6i_spi_regs,
+	.bits			= sun6i_spi_bits,
+	.fifo_depth		= 64,
+	.has_soft_reset		= true,
+	.has_burst_ctl		= true,
+	.has_ccr			= false,
 };
 
 static const struct udevice_id sun4i_spi_ids[] = {
@@ -560,7 +575,7 @@ static const struct udevice_id sun4i_spi_ids[] = {
 	},
 	{
 	  .compatible = "allwinner,sun50i-r329-spi",
-	  .data = (ulong)&sun8i_h3_spi_variant,
+	  .data = (ulong)&sun20i_d1_spi_variant,
 	},
 	{ /* sentinel */ }
 };

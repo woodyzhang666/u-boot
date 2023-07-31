@@ -23,6 +23,11 @@
 
 		blob@1 {
 			filename = "u-boot.itb";
+
+#ifdef CONFIG_SPL_SPI_LOAD
+			/* Sync with u-boot,spl-payload-offset if present */
+			offset = <CONFIG_SYS_SPI_U_BOOT_OFFS>;
+#endif
 		};
 	};
 };
@@ -47,6 +52,10 @@
 	u-boot,dm-spl;
 };
 
+&spi0 {
+	u-boot,dm-spl;
+};
+
 &osc24M {
 	u-boot,dm-spl;
 };
@@ -64,5 +73,9 @@
 };
 
 &uart0_pb8_pins {
+	u-boot,dm-spl;
+};
+
+&spi0_pins {
 	u-boot,dm-spl;
 };

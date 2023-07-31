@@ -42,6 +42,28 @@ int sunxi_get_sid(unsigned int *sid)
 	return -ENODEV;
 }
 
+#ifdef CONFIG_DEBUG_UART_BOARD_INIT
+void board_debug_uart_init(void)
+{
+	uint32_t *reg;
+	reg = 0x0200190CU;
+	*reg = 0x00010001U;
+	reg = 0x02001524U;
+	*reg = 0x0U;
+
+	/* pinmux */
+	reg = 0x02000034U;
+	uint32_t old = *reg;
+	*reg = (old & ~0xFFU) | 0x66U;
+
+	/* PB8,9 Pull UP
+	reg = 0x02000054U;
+	old = *reg;
+	*reg = (old & ~0xF0000U) | 0x50000U;
+	*/
+}
+#endif
+
 #define SPL_ADDR		CONFIG_SUNXI_SRAM_ADDRESS
 
 /* The low 8-bits of the 'boot_media' field in the SPL header */
