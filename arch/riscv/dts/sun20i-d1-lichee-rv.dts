@@ -67,6 +67,8 @@
 &uart0 {
 	pinctrl-0 = <&uart0_pb8_pins>;
 	pinctrl-names = "default";
+	current-speed = <115200>;
+	clock-frequency = <24000000>;
 	status = "okay";
 };
 
