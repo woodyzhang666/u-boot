@@ -229,6 +229,10 @@ int spl_board_init_f(void)
 	csr_write(CSR_MHCR, 0x11ff);
 	csr_write(CSR_MHINT, 0x16e30c);
 
+	/* raise cpu freq to 1080MHz */
+	uint32_t pll_cpu = *(uint32_t *)0x02001000;
+	*(uint32_t *)0x02001000 = (pll_cpu & ~0xFF00) | 0x2d00;
+
 	return 0;
 }
 
